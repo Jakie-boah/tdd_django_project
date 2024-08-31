@@ -6,7 +6,7 @@ class NewVisitorTest(unittest.TestCase):
     """Тест нового посетителя"""
 
     def setUp(self):
-        self.browser = webdriver.Firefox()
+        self.browser = webdriver.Safari()
 
     def tearDown(self):
         self.browser.quit()
