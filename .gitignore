@@ -1,2 +1,5 @@
 venv
 .idea
+db.sqlite
+__pycahe__
+*.pyc
