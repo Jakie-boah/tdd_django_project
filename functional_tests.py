@@ -33,9 +33,23 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
 
         table = self.browser.find_element(by=By.ID, value='id_list_table')
-        rows = table.find_elements('tr')
+        rows = table.find_elements(by=By.TAG_NAME, value='tr')
         self.assertTrue(
-            any(row.text == '1: Купить павлиньи перья' for row in rows)
+            any(row.text.strip() == '1: Купить павлиньи перья' for row in rows),
+            f"Новый элемент списка не появился в таблице. Содержимым было: {table.text.strip()}"
+        )
+
+        inputbox = self.browser.find_element(by=By.ID, value='id_new_item')
+        inputbox.send_keys('Сделать мушку из павлиньих перьев')
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        table = self.browser.find_element(by=By.ID, value='id_list_table')
+        rows = table.find_elements(by=By.TAG_NAME, value='tr')
+        self.assertIn('1: Купить павлиньи перья', [row.text.strip() for row in rows])
+        self.assertIn(
+            '2: Сделать мушку из павлиньих перьев',
+            [row.text.strip() for row in rows]
         )
 
         self.fail('закончить тест!')
