@@ -15,6 +15,11 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element(by=By.ID, value='id_list_table')
+        rows = table.find_elements(by=By.TAG_NAME, value='tr')
+        self.assertIn(row_text, [row.text.strip() for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         self.browser.get('http://localhost:8000')
         self.assertIn('To-Do', self.browser.title)
@@ -31,26 +36,15 @@ class NewVisitorTest(unittest.TestCase):
 
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
-
-        table = self.browser.find_element(by=By.ID, value='id_list_table')
-        rows = table.find_elements(by=By.TAG_NAME, value='tr')
-        self.assertTrue(
-            any(row.text.strip() == '1: Купить павлиньи перья' for row in rows),
-            f"Новый элемент списка не появился в таблице. Содержимым было: {table.text.strip()}"
-        )
+        self.check_for_row_in_list_table('1: Купить павлиньи перья')
 
         inputbox = self.browser.find_element(by=By.ID, value='id_new_item')
         inputbox.send_keys('Сделать мушку из павлиньих перьев')
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        table = self.browser.find_element(by=By.ID, value='id_list_table')
-        rows = table.find_elements(by=By.TAG_NAME, value='tr')
-        self.assertIn('1: Купить павлиньи перья', [row.text.strip() for row in rows])
-        self.assertIn(
-            '2: Сделать мушку из павлиньих перьев',
-            [row.text.strip() for row in rows]
-        )
+        self.check_for_row_in_list_table('1: Купить павлиньи перья')
+        self.check_for_row_in_list_table('2: Купить павлиньи перья')
 
         self.fail('закончить тест!')
 
