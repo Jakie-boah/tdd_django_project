@@ -44,7 +44,7 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
 
         self.check_for_row_in_list_table('1: Купить павлиньи перья')
-        self.check_for_row_in_list_table('2: Купить павлиньи перья')
+        self.check_for_row_in_list_table('2: Сделать мушку из павлиньих перьев')
 
         self.fail('закончить тест!')
 
