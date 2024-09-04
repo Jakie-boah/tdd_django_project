@@ -9,14 +9,9 @@ def home_page(request):
         Item.objects.create(text=new_item)
         return redirect("/lists/only-one/")
 
-    items = Item.objects.all()
-
     return render(
         request,
         "home.html",
-        {
-            "items": items,
-        },
     )
 
 
