@@ -7,7 +7,7 @@ def home_page(request):
     if request.method == "POST":
         new_item = request.POST.get("item_text", "")
         Item.objects.create(text=new_item)
-        return redirect("/")
+        return redirect("/lists/only-one/")
 
     items = Item.objects.all()
 
@@ -18,3 +18,8 @@ def home_page(request):
             "items": items,
         },
     )
+
+
+def view_list(request):
+    items = Item.objects.all()
+    return render(request, 'list.html', {'items': items})

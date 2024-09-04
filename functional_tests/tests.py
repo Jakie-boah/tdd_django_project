@@ -94,8 +94,8 @@ class NewVisitorTest(LiveServerTestCase):
 
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element(by=By.TAG_NAME, value="body").text
-        self.assertNotIn('Купить павлиньи перья', page_text)
-        self.assertNotIn('Сделать мушку', page_text)
+        self.assertNotIn('Купить павлиньи перья', page_text.strip())
+        self.assertNotIn('Сделать мушку', page_text.strip())
 
         inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
         inputbox.send_keys('Купить молоко')
