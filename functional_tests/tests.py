@@ -1,18 +1,14 @@
-from selenium import webdriver
-import unittest
-
-from selenium.common.exceptions import WebDriverException
-from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-import time
 from django.test import LiveServerTestCase
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import WebDriverException
+import time
 
-MAX_WAIT = 10
+MAX_WAIT = 5
 
 
 class NewVisitorTest(LiveServerTestCase):
-    """Тест нового посетителя"""
-
     def setUp(self):
         self.browser = webdriver.Safari()
 
@@ -23,93 +19,91 @@ class NewVisitorTest(LiveServerTestCase):
         start_time = time.time()
         while True:
             try:
-                table = self.browser.find_element(by=By.ID, value="id_list_table")
-                rows = table.find_elements(by=By.TAG_NAME, value="tr")
+                table = self.browser.find_element(By.ID, "id_list_table")
+                rows = table.find_elements(By.TAG_NAME, "tr")
                 self.assertIn(row_text, [row.text.strip() for row in rows])
                 return
-            except (AssertionError, WebDriverException) as e:
+            except (AssertionError, WebDriverException):
                 if time.time() - start_time > MAX_WAIT:
-                    raise e
-
+                    raise
                 time.sleep(0.5)
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def test_can_start_a_todo_list(self):
+        # Edith has heard about a cool new online to-do app.
+        # She goes to check out its homepage
         self.browser.get(self.live_server_url)
+
+        # She notices the page title and header mention to-do lists
         self.assertIn("To-Do", self.browser.title)
-        header_text = self.browser.find_element(by=By.TAG_NAME, value="h1").text
+        header_text = self.browser.find_element(By.TAG_NAME, "h1").text
         self.assertIn("To-Do", header_text)
 
-        inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
+        # She is invited to enter a to-do item straight away
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
         self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
 
-        inputbox.send_keys("Купить павлиньи перья")
+        # She types "Buy peacock feathers" into a text box
+        # (Edith's hobby is tying fly-fishing lures)
+        inputbox.send_keys("Buy peacock feathers")
 
+        # When she hits enter, the page updates, and now the page lists
+        # "1: Buy peacock feathers" as an item in a to-do list table
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table("1: Купить павлиньи перья")
+        self.wait_for_row_in_list_table("1: Buy peacock feathers")
 
-        inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
-        inputbox.send_keys("Сделать мушку из павлиньих перьев")
+        # There is still a text box inviting her to add another item.
+        # She enters "Use peacock feathers to make a fly"
+        # (Edith is very methodical)
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox.send_keys("Use peacock feathers to make a fly")
         inputbox.send_keys(Keys.ENTER)
 
-        self.wait_for_row_in_list_table("1: Купить павлиньи перья")
-        self.wait_for_row_in_list_table("2: Сделать мушку из павлиньих перьев")
+        # The page updates again, and now shows both items on her list
+        self.wait_for_row_in_list_table("1: Buy peacock feathers")
+        self.wait_for_row_in_list_table("2: Use peacock feathers to make a fly")
 
-        self.fail("закончить тест!")
+        # Satisfied, she goes back to sleep
 
-    def test_can_start_a_list_for_one_user(self):
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # Edith starts a new to-do list
         self.browser.get(self.live_server_url)
-        self.assertIn("To-Do", self.browser.title)
-        header_text = self.browser.find_element(by=By.TAG_NAME, value="h1").text
-        self.assertIn("To-Do", header_text)
-
-        inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
-        self.assertEqual(inputbox.get_attribute("placeholder"), "Enter a to-do item")
-
-        inputbox.send_keys("Купить павлиньи перья")
-
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox.send_keys("Buy peacock feathers")
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table("1: Купить павлиньи перья")
+        self.wait_for_row_in_list_table("1: Buy peacock feathers")
 
-        inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
-        inputbox.send_keys("Сделать мушку из павлиньих перьев")
-        inputbox.send_keys(Keys.ENTER)
-
-        self.wait_for_row_in_list_table("1: Купить павлиньи перья")
-        self.wait_for_row_in_list_table("2: Сделать мушку из павлиньих перьев")
-
-        self.fail("закончить тест!")
-
-    def test_multiple_users_can_lists_at_different_urls(self):
-        self.browser.get(self.live_server_url)
-        inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
-        inputbox.send_keys('Купить павлиньи перья')
-        inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Купить павлиньи перья')
-
+        # She notices that her list has a unique URL
         edith_list_url = self.browser.current_url
-        self.assertRegex(edith_list_url, '/lists/.+')
+        self.assertRegex(edith_list_url, "/lists/.+")
 
-        self.browser.quit()
-        self.browser = webdriver.Safari()
+        # Now a new user, Francis, comes along to the site.
 
+        ## We delete all the browser's cookies
+        ## as a way of simulating a brand new user session
+        self.browser.delete_all_cookies()
+
+        # Francis visits the home page.  There is no sign of Edith's
+        # list
         self.browser.get(self.live_server_url)
-        page_text = self.browser.find_element(by=By.TAG_NAME, value="body").text
-        self.assertNotIn('Купить павлиньи перья', page_text.strip())
-        self.assertNotIn('Сделать мушку', page_text.strip())
+        page_text = self.browser.find_element(By.TAG_NAME, "body").text
+        self.assertNotIn("Buy peacock feathers", page_text)
+        self.assertNotIn("make a fly", page_text)
 
-        inputbox = self.browser.find_element(by=By.ID, value="id_new_item")
-        inputbox.send_keys('Купить молоко')
+        # Francis starts a new list by entering a new item. He
+        # is less interesting than Edith...
+        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox.send_keys("Buy milk")
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Купить молоко')
+        self.wait_for_row_in_list_table("1: Buy milk")
 
-        francis_lit_url = self.browser.current_url
-        self.assertRegex(francis_lit_url, '/lists/.+')
-        self.assertNotEqual(francis_lit_url, edith_list_url)
+        # Francis gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, "/lists/.+")
+        self.assertNotEqual(francis_list_url, edith_list_url)
 
-        page_text = self.browser.find_element(by=By.TAG_NAME, value="body").text
-        self.assertNotIn('Купить павлиньи перья', page_text)
-        self.assertIn('Купить молоко', page_text)
+        # Again, there is no trace of Edith's list
+        page_text = self.browser.find_element(By.TAG_NAME, "body").text
+        self.assertNotIn("Buy peacock feathers", page_text)
+        self.assertIn("Buy milk", page_text)
 
-
-if __name__ == "__main__":
-    unittest.main(warnings="ignore")
+        # Satisfied, they both go back to sleep
