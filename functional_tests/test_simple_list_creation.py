@@ -44,7 +44,7 @@ class NewVisitorTest(FunctionalTest):
     def test_multiple_users_can_start_lists_at_different_urls(self):
         # Edith starts a new to-do list
         self.browser.get(self.live_server_url)
-        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox = self.get_item_input_box()
         inputbox.send_keys("Buy peacock feathers")
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table("1: Buy peacock feathers")
@@ -68,7 +68,7 @@ class NewVisitorTest(FunctionalTest):
 
         # Francis starts a new list by entering a new item. He
         # is less interesting than Edith...
-        inputbox = self.browser.find_element(By.ID, "id_new_item")
+        inputbox = self.get_item_input_box()
         inputbox.send_keys("Buy milk")
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table("1: Buy milk")
