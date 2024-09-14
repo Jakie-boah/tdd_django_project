@@ -31,7 +31,7 @@ class ListAndItemModelsTest(TestCase):
 
         list_ = List.objects.create()
 
-        item = Item(list=list_, text='')
+        item = Item(list=list_, text="")
         with self.assertRaises(ValidationError):
             item.save()
             item.full_clean()

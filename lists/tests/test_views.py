@@ -17,8 +17,8 @@ class ListViewTest(TestCase):
     def test_passes_correct_list_to_template(self):
         other_list = List.objects.create()
         correct_list = List.objects.create()
-        response = self.client.get(f'/lists/{correct_list.id}/')
-        self.assertEqual(response.context['list'], correct_list)
+        response = self.client.get(f"/lists/{correct_list.id}/")
+        self.assertEqual(response.context["list"], correct_list)
 
     def test_uses_list_template(self):
         list_ = List.objects.create()
@@ -35,39 +35,45 @@ class ListViewTest(TestCase):
 
         other_list = List.objects.create()
 
-        Item.objects.create(text='другой элемент 1 списка', list=other_list)
-        Item.objects.create(text='другой элемент 2 списка', list=other_list)
+        Item.objects.create(text="другой элемент 1 списка", list=other_list)
+        Item.objects.create(text="другой элемент 2 списка", list=other_list)
 
         response = self.client.get(f"/lists/{correct_list.id}/")
 
-        self.assertContains(response, 'itemey 1')
-        self.assertContains(response, 'itemey 2')
-        self.assertNotContains(response, 'другой элемент 1 списка')
-        self.assertNotContains(response, 'другой элемент 2 списка')
+        self.assertContains(response, "itemey 1")
+        self.assertContains(response, "itemey 2")
+        self.assertNotContains(response, "другой элемент 1 списка")
+        self.assertNotContains(response, "другой элемент 2 списка")
 
-
-class NewListTest(TestCase):
     def test_can_save_a_POST_request_to_an_existing_list(self):
+        """тест: можно сохранить post-запрос в существующий список"""
+
         other_list = List.objects.create()
         correct_list = List.objects.create()
-
-        self.client.post(f"/lists/{correct_list.id}/add_item", data={"item_text": "A new list item"})
+        self.client.post(
+            f"/lists/{correct_list.id}/",
+            data={"item_text": "A new item for an existing list"},
+        )
 
         self.assertEqual(Item.objects.count(), 1)
 
         new_item = Item.objects.first()
-
-        self.assertEqual(new_item.text, "A new list item")
+        self.assertEqual(new_item.text, "A new item for an existing list")
         self.assertEqual(new_item.list, correct_list)
 
-    def test_redirects_to_list_view(self):
+    def test_POST_redirects_to_list_view(self):
+        """тест: post-запрос переадресуется в представление списка"""
         other_list = List.objects.create()
-        correct_list = List.objects.create()
 
-        response = self.client.post(f'/lists/{correct_list.id}/add_item',
-                                    data={'item_text': 'A new item for an existing list'}
-                                    )
-        self.assertRedirects(response, f'/lists/{correct_list.id}/')
+        correct_list = List.objects.create()
+        response = self.client.post(
+            f"/lists/{correct_list.id}/",
+            data={"item_text": "A new item for an existing list"},
+        )
+        self.assertRedirects(response, f"/lists/{correct_list.id}/")
+
+
+class NewListTest(TestCase):
 
     def test_can_save_a_POST_request(self):
         response = self.client.post("/lists/new", data={"item_text": "A new list item"})
@@ -84,16 +90,16 @@ class NewListTest(TestCase):
     def test_validation_errors_are_sent_back_to_home_page_template(self):
         """тест: ошибки валидации отсылаются назад в шаблон домашней страницы"""
 
-        response = self.client.post('/lists/new', data={'item_text': ''})
+        response = self.client.post("/lists/new", data={"item_text": ""})
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertTemplateUsed(response, "home.html")
 
         expected_error = "You can't have an empty list item"
 
         self.assertContains(response, escape(expected_error))
 
     def test_invalid_list_items_arent_saved(self):
-        '''тест: сохраняются недопустимые элементы списка'''
-        self.client.post('/lists/new', data={'item_text': ''})
+        """тест: сохраняются недопустимые элементы списка"""
+        self.client.post("/lists/new", data={"item_text": ""})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
