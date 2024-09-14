@@ -26,7 +26,7 @@ class ItemValidationTest(FunctionalTest):
         # Эдит получает аналогичное предупреждение на странице списка
         self.wait_for(
             lambda: self.assertEqual(
-                self.browser.find_element(by=By.CSS_SELECTOR, value='.has-error').text,
+                self.browser.find_element(by=By.CSS_SELECTOR, value='.has-error').text.strip(),
                 "You can't have an empty list item"
             )
         )
