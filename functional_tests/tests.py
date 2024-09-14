@@ -4,11 +4,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 import time
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 MAX_WAIT = 5
 
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Safari()
 
