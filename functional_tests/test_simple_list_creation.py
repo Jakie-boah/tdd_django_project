@@ -1,11 +1,5 @@
-from django.test import LiveServerTestCase
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import WebDriverException
-import time
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from unittest import skip
 from .base import FunctionalTest
 
 
